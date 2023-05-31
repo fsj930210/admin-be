@@ -3,7 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpAdapterHost,
-  HttpException,
+  InternalServerErrorException,
   HttpStatus,
 } from '@nestjs/common';
 import * as requestIp from 'request-ip';
@@ -17,13 +17,11 @@ export class AllExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const { httpAdapter } = this.httpAdapterHost;
-    const httpStatus =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-    const message: unknown =
-      (exception as any)['response'] || 'Internal Server Error';
-
+    const httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    console.log(exception);
+    // exception 应该记录日志，而不是反馈给用户
+    const message = (new InternalServerErrorException().getResponse() as any)
+      .message;
     const responseBody = {
       headers: request.headers,
       query: request.query,
@@ -31,10 +29,8 @@ export class AllExceptionFilter implements ExceptionFilter {
       params: request.params,
       timestamp: new Date().toISOString(),
       ip: requestIp.getClientIp(request),
-      exception: (exception as any)['name'],
-      message: message,
+      message,
     };
-
     httpAdapter.reply(response, responseBody, httpStatus);
   }
 }

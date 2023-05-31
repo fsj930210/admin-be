@@ -1,0 +1,8 @@
+mysql:
+  url: 127.0.0.1
+swagger:
+  enable: true
+  path: swagger-api
+  version: 1
+  title: admin后台管理系统
+  desc: nestjs mysql redis jwt swagger 后台管理系统

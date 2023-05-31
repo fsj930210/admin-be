@@ -1,0 +1,8 @@
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  database: admin_dev
+  username: root
+  password: shaojian06
+  timezone: +08:00
+  synchronize: true
