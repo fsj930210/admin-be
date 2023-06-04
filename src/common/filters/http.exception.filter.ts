@@ -15,24 +15,26 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const requset = ctx.getRequest<Request>();
-    const status = exception.getStatus();
-    // 处理业务逻辑，返回业务统一格式
-    if (exception instanceof BusinessException) {
-      const message = exception.getResponse();
-      console.log(message);
-      const code = exception.getErrorCode();
-      response
-        .status(HttpStatus.OK)
-        .json(new BasicResponseDto(code, null, message as string));
-      return;
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const exceptionRes = exception.getResponse();
+    const code =
+      exception instanceof BusinessException
+        ? (exception as BusinessException).getErrorCode()
+        : status;
+    console.log('status', status, 'code', code);
+
+    let message = exception?.message || '系统内部异常';
+    const exceptionMsg = (exceptionRes as any)?.message;
+    if (typeof exceptionMsg === 'string') {
+      // pipe验证错误
+      message = exceptionMsg;
+    } else if (Array.isArray(exceptionMsg)) {
+      // dto验证错误
+      message = exceptionMsg.join('、');
     }
-    // 其他如404等 返回更详细信息
-    response.status(status).json({
-      code: status,
-      path: requset.url,
-      method: requset.method,
-      message: exception.message,
-      timestamp: new Date().toISOString(),
-    });
+    response.status(status).json(new BasicResponseDto(code, null, message));
   }
 }

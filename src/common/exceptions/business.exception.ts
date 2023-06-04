@@ -7,8 +7,8 @@ export class BusinessException extends HttpException {
    */
   private errorCode: ErrorCodeType;
 
-  constructor(errorCode: ErrorCodeType) {
-    super(ERROR_CODE[errorCode], HttpStatus.OK);
+  constructor(errorCode: ErrorCodeType, status = HttpStatus.OK) {
+    super(ERROR_CODE[errorCode], status);
     this.errorCode = errorCode;
   }
 

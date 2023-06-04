@@ -5,18 +5,22 @@ import {
   ApiProperty,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { SUCCESS_CODE } from '../constants/errorCode';
+import { ErrorCodeType, SUCCESS_CODE } from '../constants/errorCode';
 
 export class BasicResponseDto<T> {
   readonly data: T | null;
 
   @ApiProperty()
-  readonly code: string;
+  readonly code: ErrorCodeType | number | string;
 
   @ApiProperty()
   readonly message: string;
 
-  constructor(code: string, data = null, message = 'success') {
+  constructor(
+    code: ErrorCodeType | number | string,
+    data = null,
+    message = 'success',
+  ) {
     this.code = code;
     this.data = data;
     this.message = message;
