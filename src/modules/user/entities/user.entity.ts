@@ -44,31 +44,6 @@ export class User extends BaseEntity {
   })
   status: number;
 
-  @ApiProperty({
-    type: String,
-    description: '备注',
-  })
-  @Column({
-    type: 'varchar',
-    length: 255,
-    nullable: true,
-    comment: '备注',
-  })
-  remark: string;
-
-  @ApiProperty({
-    type: Number,
-    description: '软删除 0-未删除 1-已删除',
-  })
-  @Exclude()
-  @Column({
-    type: 'tinyint',
-    select: false,
-    default: 0,
-    comment: '软删除 0-未删除 1-已删除',
-  })
-  deleted: number;
-
   @ApiHideProperty()
   @ManyToMany(() => Role, (roles) => roles.users)
   @JoinTable({

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { hash as bcryptHash, compare as bcryptCompare } from 'bcryptjs';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { ERROR_CODE_ENUM } from '@/common/enum/errorCode.enum';
-import { Entity, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import { ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 import { IPaginationParams } from '@/common/interface';
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../common/constants/index';
 import { PaginatedResponseDto } from '@/common/dto/response.dto';
-
+import { nanoid } from 'nanoid/async';
 @Injectable()
 export class UtilService {
   async encrypt(value: string) {
@@ -35,5 +35,8 @@ export class UtilService {
     queryBuilder.take(page_size).skip((page - 1) * page_size);
     const [items, total] = await queryBuilder.getManyAndCount();
     return new PaginatedResponseDto(items, { total, page, page_size });
+  }
+  async generateUUID() {
+    return await nanoid();
   }
 }

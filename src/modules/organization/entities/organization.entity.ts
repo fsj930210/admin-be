@@ -3,7 +3,7 @@ import { User } from '@/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, OneToMany } from 'typeorm';
 
-@Entity()
+@Entity('organization')
 export class Organization extends BaseEntity {
   @ApiProperty({
     type: String,
@@ -11,7 +11,7 @@ export class Organization extends BaseEntity {
   })
   @Column({
     type: 'varchar',
-    length: 64,
+    length: 255,
     comment: '组织名称',
   })
   org_name: string;

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager, Like, In } from 'typeorm';
+import { Repository, EntityManager, Like } from 'typeorm';
 import { User } from './entities/user.entity';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { UtilService } from '../../shared/utils.service';
@@ -163,7 +163,7 @@ export class UserService {
       const hashPassword = await this.utilService.encrypt(password);
       let roles: Role[] = [];
       let org: Organization;
-      if (roles.length > 0) {
+      if (roleCodes.length > 0) {
         roles = await this.roleService.findAllByCodes(roleCodes);
       } else {
         // 默认普通用户
