@@ -1,10 +1,23 @@
+app:
+ port: 3000
 mysql:
-  host: localhost
+  host: 127.0.0.1
   port: 3306
   database: admin_dev
   username: root
-  password: shaojian06
+  password: qaz123456
   timezone: +08:00
   synchronize: true
+  logging: true
+redis:
+  host: 127.0.0.1
+  port: 6379
+  db: 0,
+  keyPrefix: admin
+logger:
+  enable: true
+  level: info
+  timestamp: true
 jwt:
-  secret: NHgJuoJYOuiXILqnXyqKQ6joRQ6YhoPfb6CUfVp6qi1OBK2rtQNjsgaxRxRAsOii
+  secret: 3QQZXSNxGqzM6F3eOS30hKFYeP2jJbkCoBta99dTRUNnsphiv89ylwcfDohM
+  expires: 1d

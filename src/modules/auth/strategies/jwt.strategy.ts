@@ -5,6 +5,7 @@ import { ExtractJwt, StrategyOptions } from 'passport-jwt';
 import { Strategy } from 'passport-jwt';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { UserService } from '@/modules/user/user.service';
+import { ERROR_CODE_ENUM } from '@/common/enum/errorCode.enum';
 
 export type JwtPayload = {
   username: string;
@@ -15,7 +16,10 @@ export type JwtPayload = {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService, private readonly userService: UserService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -24,9 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
   async validate(payload: JwtPayload) {
     console.log(' JwtStrategy payload', payload);
-    const existUser = await this.userService.findById(String(payload.id));
+    const existUser = await this.userService.getExistingUserByUsername(payload.username);
     if (!existUser) {
-      throw new BusinessException('10005', HttpStatus.UNAUTHORIZED);
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_10005, HttpStatus.UNAUTHORIZED);
     }
     return existUser;
   }

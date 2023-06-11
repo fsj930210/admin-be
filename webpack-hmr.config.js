@@ -1,22 +1,30 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const nodeExternals = require('webpack-node-externals');
 const { RunScriptWebpackPlugin } = require('run-script-webpack-plugin');
+const path = require('path');
 
 module.exports = function (options, webpack) {
+  const entryFile = 'hmr';
+  const allowlist = ['webpack/hot/poll?100'];
+
   return {
     ...options,
-    entry: ['webpack/hot/poll?100', options.entry],
-    externals: [
-      nodeExternals({
-        allowlist: ['webpack/hot/poll?100'],
-      }),
-    ],
+    entry: [...allowlist, `./src/${entryFile}.ts`],
+    externals: [nodeExternals({ allowlist })],
     plugins: [
       ...options.plugins,
       new webpack.HotModuleReplacementPlugin(),
       new webpack.WatchIgnorePlugin({
-        paths: [/.js$/, /.d.ts$/],
+        paths: [/\.js$/, /\.d\.ts$/],
       }),
-      new RunScriptWebpackPlugin({ name: options.output.filename }),
+      new RunScriptWebpackPlugin({
+        name: `${entryFile}.js`,
+        autoRestart: true,
+      }),
     ],
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: `${entryFile}.js`,
+    },
   };
 };

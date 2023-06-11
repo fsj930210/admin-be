@@ -3,21 +3,20 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
-  Query,
-  ParseIntPipe,
-  UseGuards,
   Req,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
+import { GetUserListDto } from './dto/getUserList.dto';
+import { CreateUserDto } from './dto/createUser.dto';
+import { ChangeUserStatus } from './dto/changeUserStatus.dto';
+import { UpdateUserDto } from './dto/updateUserDto.dto';
 
 @ApiTags('用户模块')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -25,23 +24,58 @@ import { User } from './entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: '注册用户' })
-  @Post('/register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
-  }
-
-  @ApiOperation({ summary: '获取用户信息' })
-  @ApiBearerAuth() // swagger文档设置token
-  @Get()
-  // @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: '获取登录用户信息' })
+  @ApiBearerAuth()
+  @Get('info')
   async getUserInfo(@Req() req: { user: User }) {
-    return req.user;
+    return await this.userService.getUserInfo(req.user);
   }
 
   @ApiOperation({ summary: '根据用户id获取用户信息' })
+  @ApiBearerAuth()
   @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: string) {
-    return this.userService.findById(id);
+  async findById(@Param('id') id: string) {
+    return await this.userService.findOneById(id);
+  }
+
+  @ApiOperation({ summary: '分页查询用户列表' })
+  @ApiBearerAuth()
+  @Post('list')
+  async findList(@Body() params: GetUserListDto) {
+    return await this.userService.findList(params);
+  }
+
+  @ApiOperation({ summary: '创建用户' })
+  @ApiBearerAuth()
+  @Post()
+  async create(@Body() params: CreateUserDto) {
+    return await this.userService.create(params);
+  }
+
+  @ApiOperation({ summary: '批量更新状态' })
+  @ApiBearerAuth()
+  @Put('status')
+  async batchChangeStatus(@Body() { status, ids }: ChangeUserStatus) {
+    return await this.userService.batchChangeStatus(status, ids);
+  }
+  @ApiOperation({ summary: '更新用户信息' })
+  @ApiBearerAuth()
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return await this.userService.update(id, updateUserDto);
+  }
+
+  @ApiOperation({ summary: '删除用户' })
+  @ApiBearerAuth()
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.userService.batchDelete([id]);
+  }
+
+  @ApiOperation({ summary: '批量删除用户' })
+  @ApiBearerAuth()
+  @Delete()
+  async batchDelete(@Body('ids') ids: string[]) {
+    return await this.userService.batchDelete(ids);
   }
 }

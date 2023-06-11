@@ -4,10 +4,14 @@ import { BusinessException } from '@/common/exceptions/business.exception';
 import { UtilService } from '@/shared/utils.service';
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../../user/user.service';
+import { ERROR_CODE_ENUM } from '@/common/enum/errorCode.enum';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly userService: UserService, private readonly utilservice: UtilService) {
+  constructor(
+    private readonly userService: UserService,
+    private readonly utilservice: UtilService,
+  ) {
     super({
       usernameField: 'username',
       passwordField: 'password',
@@ -15,13 +19,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
   // 这个方法的返回值会给req
   async validate(username: string, password: string) {
-    const user = await this.userService.findOneWithPassword(username);
+    const user = await this.userService.getExistingUserByUsername(username);
     if (!user) {
-      throw new BusinessException('10002');
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_10002);
     }
     const isEqual = await this.utilservice.compare(password, user.password);
     if (!isEqual) {
-      throw new BusinessException('10003');
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_10003);
     }
     return user;
   }

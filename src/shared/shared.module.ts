@@ -1,16 +1,14 @@
 import { Global, Module } from '@nestjs/common';
 import { UtilService } from './utils.service';
-
-// common provider list
-const providers = [UtilService];
+import { LoggerModule } from './logger.module';
 
 /**
  * 全局共享模块
  */
 @Global()
 @Module({
-  imports: [],
-  providers: [...providers],
-  exports: [...providers],
+  imports: [LoggerModule],
+  providers: [UtilService],
+  exports: [UtilService],
 })
 export class SharedModule {}

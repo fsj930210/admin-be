@@ -2,6 +2,7 @@ import { CallHandler, NestInterceptor, Injectable, ExecutionContext } from '@nes
 import { Reflector } from '@nestjs/core';
 import { Observable, map } from 'rxjs';
 import { NOT_TRANSFORM_METADATA } from '../constants';
+import { BasicResponseDto } from '../dto/response.dto';
 
 interface Response<T> {
   data: T;
@@ -16,11 +17,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
         if (keep) {
           return data;
         } else {
-          return {
-            data,
-            code: 0,
-            message: 'success',
-          };
+          return BasicResponseDto.success(data);
         }
       }),
     );

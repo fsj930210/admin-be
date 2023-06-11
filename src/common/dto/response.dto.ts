@@ -1,58 +1,51 @@
 import { applyDecorators, Type } from '@nestjs/common';
-import {
-  ApiExtraModels,
-  ApiOkResponse,
-  ApiProperty,
-  getSchemaPath,
-} from '@nestjs/swagger';
-import { ErrorCodeType, SUCCESS_CODE } from '../constants/errorCode';
+import { ApiExtraModels, ApiOkResponse, ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { SUCCESS_CODE } from '../constants';
 
 export class BasicResponseDto<T> {
   readonly data: T | null;
 
-  @ApiProperty()
-  readonly code: ErrorCodeType | number | string;
+  @ApiProperty({ description: 'code' })
+  readonly code: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'message' })
   readonly message: string;
 
-  constructor(
-    code: ErrorCodeType | number | string,
-    data = null,
-    message = 'success',
-  ) {
+  constructor(code: string, data: T = null, message = 'success') {
     this.code = code;
     this.data = data;
     this.message = message;
   }
 
-  static success(data = null) {
+  static success(data: any = null) {
     return new BasicResponseDto(SUCCESS_CODE, data);
   }
 }
 
 export class Pagination {
-  @ApiProperty()
+  @ApiProperty({ description: '总数' })
   total: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: '当前页' })
   page: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: '每页多少条' })
   page_size: number;
 }
 
 export class PaginatedResponseDto<T> {
+  @ApiProperty({ description: '数据' })
   data: T[];
 
-  @ApiProperty()
+  @ApiProperty({ description: '分页信息' })
   paging: Pagination;
+  constructor(data: T[], paging: Pagination) {
+    this.data = data;
+    this.paging = paging;
+  }
 }
 
-export const ApiResponse = <
-  DataDto extends Type<unknown>,
-  WrapperDataDto extends Type<unknown>,
->(
+export const ApiResponse = <DataDto extends Type<unknown>, WrapperDataDto extends Type<unknown>>(
   dataDto: DataDto,
   wrapperDataDto: WrapperDataDto,
 ) =>
@@ -76,10 +69,8 @@ export const ApiResponse = <
     }),
   );
 
-export const ApiOkResponseData = <DataDto extends Type<unknown>>(
-  dataDto: DataDto,
-) => ApiResponse(dataDto, BasicResponseDto);
+export const ApiOkResponseData = <DataDto extends Type<unknown>>(dataDto: DataDto) =>
+  ApiResponse(dataDto, BasicResponseDto);
 
-export const ApiOkResponsePaginated = <DataDto extends Type<unknown>>(
-  dataDto: DataDto,
-) => ApiResponse(dataDto, PaginatedResponseDto);
+export const ApiOkResponsePaginated = <DataDto extends Type<unknown>>(dataDto: DataDto) =>
+  ApiResponse(dataDto, PaginatedResponseDto);

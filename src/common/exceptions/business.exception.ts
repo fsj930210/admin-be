@@ -1,18 +1,21 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ERROR_CODE, ErrorCodeType } from '../constants/errorCode';
+import { ERROR_CODE_ENUM } from '../enum/errorCode.enum';
 
 export class BusinessException extends HttpException {
   /**
    * 业务错误码
    */
-  private errorCode: ErrorCodeType;
+  private errorCode: string;
 
-  constructor(errorCode: ErrorCodeType, status = HttpStatus.OK) {
-    super(ERROR_CODE[errorCode], status);
-    this.errorCode = errorCode;
+  constructor(errorCode: ERROR_CODE_ENUM, status = HttpStatus.OK) {
+    super(errorCode, status);
+    this.errorCode = Object.entries(ERROR_CODE_ENUM)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .find(([_, val]) => val === errorCode)?.[0]
+      ?.replace('ERROR_CODE_', '') as string;
   }
 
-  getErrorCode(): ErrorCodeType {
+  getErrorCode(): string {
     return this.errorCode;
   }
 }

@@ -1,43 +1,66 @@
+import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
-export class Organization {
-  @ApiProperty({ description: '组织id' })
-  @PrimaryGeneratedColumn('increment', { comment: '组织id' })
-  id: number;
+export class Organization extends BaseEntity {
+  @ApiProperty({
+    type: String,
+    description: '组织名称',
+  })
+  @Column({
+    type: 'varchar',
+    length: 64,
+    comment: '组织名称',
+  })
+  org_name: string;
 
-  @ApiProperty({ description: '组织名称' })
-  @Column({ length: 64, comment: '组织名称' })
-  name: string;
+  @ApiProperty({
+    type: String,
+    description: '组织编码',
+  })
+  @Column({
+    type: 'varchar',
+    length: 64,
+    unique: true,
+    comment: '组织名称',
+  })
+  org_code: string;
 
-  @ApiProperty({ description: '父组织id' })
-  @Column({ comment: '父组织id' })
+  @ApiProperty({
+    type: Number,
+    description: '父组织id 0根组织',
+  })
+  @Column({
+    type: 'int',
+    comment: '父组织id',
+    default: 0,
+  })
   parent_id: number;
 
-  @ApiProperty({ description: '组织级联路径' })
-  @Column({ comment: '组织级联路径' })
+  @ApiProperty({
+    type: String,
+    description: '组织路径',
+  })
+  @Column({
+    type: 'varchar',
+    length: 1024,
+    comment: '组织路径',
+  })
   path: string;
 
-  @ApiProperty({ description: '创建时间' })
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    comment: '创建时间',
+  @ApiProperty({
+    type: Number,
+    description: '序号，数值越大显示越靠前，如果相同序号按照创建时间排序',
   })
-  created_at: Date;
-
-  @ApiProperty({ description: '更新时间' })
-  @Exclude()
   @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    comment: '更新时间',
+    type: 'int',
+    comment: '序号，数值越大显示越靠前，如果相同序号按照创建时间排序 ',
+    default: 0,
   })
-  updated_at: Date;
+  order: number;
 
-  @ManyToMany(() => User, (users) => users.orgs)
+  @OneToMany(() => User, (users) => users.organization)
   users: User[];
 }

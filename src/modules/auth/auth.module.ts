@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
@@ -8,6 +8,8 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { RoleModule } from '../role/role.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       },
     }),
     UserModule,
+    RoleModule,
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [UtilService, AuthService, LocalStrategy, JwtStrategy],

@@ -14,13 +14,11 @@ export class RoleController {
 
   @Get()
   findAll() {
-    return this.roleService.findAll();
+    return '';
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roleService.findOne(+id);
-  }
+  findOne(@Param('id') id: string) {}
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {

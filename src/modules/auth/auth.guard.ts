@@ -7,6 +7,7 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { BusinessException } from '@/common/exceptions/business.exception';
 import { AUTHORIZE_KEY_METADATA } from '@/common/constants';
+import { ERROR_CODE_ENUM } from '@/common/enum/errorCode.enum';
 
 @Injectable()
 export class JwtGuard extends AuthGuard('jwt') {
@@ -27,7 +28,7 @@ export class JwtGuard extends AuthGuard('jwt') {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new BusinessException('10004', HttpStatus.UNAUTHORIZED);
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_10004, HttpStatus.UNAUTHORIZED);
     }
     try {
       const payload = await verify(token, this.configService.get('jwt.secret') as string);
@@ -35,7 +36,7 @@ export class JwtGuard extends AuthGuard('jwt') {
       request['user'] = payload;
     } catch (error) {
       console.log(error);
-      throw new BusinessException('10005', HttpStatus.UNAUTHORIZED);
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_10005, HttpStatus.UNAUTHORIZED);
     }
     const parentCanActivate = (await super.canActivate(context)) as boolean; // this is necessary due to possibly returning `boolean | Promise<boolean> | Observable<boolean>
     // custom logic goes here too
