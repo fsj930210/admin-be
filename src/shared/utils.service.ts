@@ -7,6 +7,7 @@ import { IPaginationParams } from '@/common/interface';
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from '../common/constants/index';
 import { PaginatedResponseDto } from '@/common/dto/response.dto';
 import { nanoid } from 'nanoid/async';
+
 @Injectable()
 export class UtilService {
   async encrypt(value: string) {
@@ -38,5 +39,37 @@ export class UtilService {
   }
   async generateUUID() {
     return await nanoid();
+  }
+  findAncestorsTree<T extends ObjectLiteral>(list: T[]) {
+    let itemMap: any = {};
+    const result: T[] = [];
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      const itemId = item.id;
+      const parentId = item?.parent?.id;
+      delete item.parent;
+      if (!itemMap[itemId]) {
+        itemMap[itemId] = {
+          children: [],
+        };
+      }
+      itemMap[itemId] = {
+        ...item,
+        children: itemMap[itemId]['children'],
+      };
+      const treeItem = itemMap[itemId];
+      if (!parentId) {
+        result.push(treeItem);
+      } else {
+        if (!itemMap[parentId]) {
+          itemMap[parentId] = {
+            children: [],
+          };
+        }
+        itemMap[parentId].children.push(treeItem);
+      }
+    }
+    itemMap = null;
+    return result;
   }
 }

@@ -13,10 +13,10 @@ import {
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { GetUserListDto } from './dto/getUserList.dto';
-import { CreateUserDto } from './dto/createUser.dto';
-import { ChangeUserStatus } from './dto/changeUserStatus.dto';
-import { UpdateUserDto } from './dto/updateUserDto.dto';
+import { GetUserListDto } from './dto/find-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { ChangeUserStatus } from './dto/change-userStatus.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('用户模块')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -65,17 +65,17 @@ export class UserController {
     return await this.userService.update(id, updateUserDto);
   }
 
-  @ApiOperation({ summary: '删除用户' })
-  @ApiBearerAuth()
-  @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return await this.userService.batchDelete([id]);
-  }
-
   @ApiOperation({ summary: '批量删除用户' })
   @ApiBearerAuth()
   @Delete()
   async batchDelete(@Body('ids') ids: string[]) {
     return await this.userService.batchDelete(ids);
+  }
+
+  @ApiOperation({ summary: '删除用户' })
+  @ApiBearerAuth()
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    return await this.userService.batchDelete([id]);
   }
 }

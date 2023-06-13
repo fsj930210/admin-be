@@ -7,11 +7,11 @@ import { UtilService } from '../../shared/utils.service';
 import { AuthDto } from '../auth/dto/auth.dto';
 import { ERROR_CODE_ENUM } from '@/common/enum/errorCode.enum';
 import { RoleService } from '../role/role.service';
-import { GetUserListDto } from './dto/getUserList.dto';
-import { CreateUserDto } from './dto/createUser.dto';
+import { GetUserListDto } from './dto/find-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '../role/entities/role.entity';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { UpdateUserDto } from './dto/updateUserDto.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { OrganizationService } from '../organization/organization.service';
 import { Organization } from '../organization/entities/organization.entity';
 
@@ -102,7 +102,15 @@ export class UserService {
     user.organization = org;
     return user;
   }
-
+  /**
+   *
+   * @param org_code
+   * @returns
+   * @description 查询指定org下用户数量
+   */
+  async findCountByOrgCode(org_code: string) {
+    return this.userRepository.countBy({ organization: { org_code } });
+  }
   /**
    *
    * @param username
@@ -133,7 +141,7 @@ export class UserService {
     // 默认普通用户
     const role = await this.roleService.getDefaultRole();
     // 默认根组织
-    const organization = await this.orgService.getDefaultOrg();
+    const organization = await this.orgService.findDefaultOrg();
     const user = await this.entityManager.transaction(async (manager) => {
       const hashPassword = await this.utilService.encrypt(password);
       const user = manager.create(User, {
@@ -171,9 +179,9 @@ export class UserService {
         defaultRole && roles.push(defaultRole);
       }
       if (org_code) {
-        org = await this.orgService.getOrgByCode(org_code);
+        org = await this.orgService.findOrgByCode(org_code);
       } else {
-        org = await this.orgService.getDefaultOrg();
+        org = await this.orgService.findDefaultOrg();
       }
       const newUser = manager.create(User, {
         username,
@@ -192,6 +200,10 @@ export class UserService {
    * @description 更新用户信息
    */
   async update(id: string, { roles: roleCodes, org_code, password, ...rest }: UpdateUserDto) {
+    const org = await this.orgService.findOrgByCode(org_code);
+    if (!org) {
+      throw new BusinessException(ERROR_CODE_ENUM.ERROR_CODE_20005);
+    }
     await this.entityManager.transaction(async (manager) => {
       if (password) {
         await this.utilService.encrypt(password);
@@ -205,14 +217,16 @@ export class UserService {
         .leftJoinAndSelect('user.organization', 'org')
         .where('user.id = :id', { id })
         .getOne();
-      const roles = await this.roleService.findAllByCodes(roleCodes);
-      const org = await this.orgService.getOrgByCode(org_code);
-      // 多对多关系
-      await manager
-        .createQueryBuilder()
-        .relation(User, 'roles')
-        .of(id)
-        .addAndRemove(roles, user?.roles);
+      if (roleCodes?.length > 0) {
+        const roles = await this.roleService.findAllByCodes(roleCodes);
+        // 多对多关系
+        await manager
+          .createQueryBuilder()
+          .relation(User, 'roles')
+          .of(id)
+          .addAndRemove(roles, user?.roles);
+      }
+
       // 多对一关系
       await manager.createQueryBuilder().relation(User, 'organization').of(id).set(org);
     });

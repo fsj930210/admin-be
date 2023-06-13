@@ -3,7 +3,6 @@ import { Menu } from '@/modules/menu/entities/menu.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, ManyToMany } from 'typeorm';
-import { Exclude } from 'class-transformer';
 
 @Entity('role')
 export class Role extends BaseEntity {
@@ -13,6 +12,7 @@ export class Role extends BaseEntity {
   })
   @Column({
     type: 'varchar',
+    length: 64,
     comment: '角色名称',
   })
   role_name: string;
@@ -39,31 +39,6 @@ export class Role extends BaseEntity {
     comment: '角色状态 0-不可用 1-可用',
   })
   status: number;
-
-  @ApiProperty({
-    type: String,
-    description: '角色备注',
-  })
-  @Column({
-    type: 'varchar',
-    length: 255,
-    nullable: true,
-    comment: '角色备注',
-  })
-  remark: string;
-
-  @ApiProperty({
-    type: Number,
-    description: '软删除 0-未删除 1-已删除',
-  })
-  @Exclude()
-  @Column({
-    type: 'tinyint',
-    select: false,
-    default: 0,
-    comment: '软删除 0-未删除 1-已删除',
-  })
-  deleted: number;
 
   @ManyToMany(() => User, (users) => users.roles)
   users: User[];

@@ -1,9 +1,10 @@
 import { BaseEntity } from '@/common/entities/base.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Tree, TreeChildren, TreeParent } from 'typeorm';
 
 @Entity('organization')
+@Tree('materialized-path')
 export class Organization extends BaseEntity {
   @ApiProperty({
     type: String,
@@ -11,7 +12,7 @@ export class Organization extends BaseEntity {
   })
   @Column({
     type: 'varchar',
-    length: 255,
+    length: 64,
     comment: '组织名称',
   })
   org_name: string;
@@ -27,17 +28,6 @@ export class Organization extends BaseEntity {
     comment: '组织名称',
   })
   org_code: string;
-
-  @ApiProperty({
-    type: Number,
-    description: '父组织id 0根组织',
-  })
-  @Column({
-    type: 'int',
-    comment: '父组织id',
-    default: 0,
-  })
-  parent_id: number;
 
   @ApiProperty({
     type: String,
@@ -59,7 +49,19 @@ export class Organization extends BaseEntity {
     comment: '序号，数值越大显示越靠前，如果相同序号按照创建时间排序 ',
     default: 0,
   })
-  order: number;
+  order_no: number;
+
+  @ApiProperty({
+    description: '父节点',
+  })
+  @TreeParent()
+  parent?: Organization | null;
+
+  @ApiProperty({
+    description: '子节点',
+  })
+  @TreeChildren({ cascade: true })
+  children!: Organization[];
 
   @OneToMany(() => User, (users) => users.organization)
   users: User[];
